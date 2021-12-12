@@ -6,6 +6,7 @@
 #include "version.h"
 
 #include <string.h>
+#include <stdio.h> 
 
 #if (defined ALLEGRO_DOS) || (defined ALLEGRO_STATICLINK)
 // Define color depths used
@@ -52,14 +53,39 @@ static void init()
 {
    char temp_buf[256];
    char *data_file_name;
+   FILE *tmpfile;
 
    /* initialize some varaibles with default values */
    if (asprintf(&options_file_name, "%s/.scantoolrc", getenv("HOME")) < 0) {
       perror("asprintf");
       exit(1);
    }
+
    data_file_name = strdup("/usr/share/scantool/scantool.dat");
+
+   //check to see file exists
+   if ( (tmpfile = fopen(data_file_name, "r")) )
+   {
+      fclose(tmpfile);
+   }
+   else
+   {
+      // fallback to a local file for portability
+      data_file_name = strdup("scantool.dat");
+   }
+
    code_defs_file_name = strdup("/usr/share/scantool/codes.dat");
+
+   //check to see file exists
+   if ( (tmpfile = fopen(code_defs_file_name, "r")) )
+   {
+      fclose(tmpfile);
+   }
+   else
+   {
+      // fallback to a local file for portability
+      code_defs_file_name = strdup("codes.dat");
+   }
    
    datafile = NULL;
    comport.status = NOT_OPEN;
@@ -142,6 +168,8 @@ static void init()
       set_gfx_mode(GFX_AUTODETECT_WINDOWED, 640, 480, 0, 0);
       display_mode &= WINDOWED_MODE_SET;
    }
+
+   set_close_button_callback(close_button_handler);
    
    write_log("Loading Data File... ");
    packfile_password(PASSWORD);
@@ -203,7 +231,6 @@ static void shut_down()
    allegro_exit();
    write_log("OK\n");
 }
-
 
 int main()
 {

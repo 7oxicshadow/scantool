@@ -31,10 +31,13 @@ static int about_proc(int msg, DIALOG *d, int c);
 static int exit_proc(int msg, DIALOG *d, int c);
 static int button_desc_proc(int msg, DIALOG *d, int c);
 static int genuine_proc(int msg, DIALOG *d, int c);
+static int force_exit_proc(int msg, DIALOG *d, int c);
 
 static char button_description[256];
 static char current_description[256];
 static char welcome_message[256];
+
+static int close_req = FALSE;
 
 static DIALOG main_dialog[] =
 {
@@ -53,6 +56,7 @@ static DIALOG main_dialog[] =
    { exit_proc,         408, 397, 207, 57,  0,           0,       'x',  D_EXIT, 0,   0,   NULL,                NULL, NULL },
    { genuine_proc,      0,   0,   0,   0,   0,           0,       0,    0,      0,   0,   NULL,                NULL, NULL },
    { d_yield_proc,      0,   0,   0,   0,   0,           0,       0,    0,      0,   0,   NULL,                NULL, NULL },
+   { force_exit_proc,   0,   0,   0,   0,   0,           0,       0,    0,      0,   0,   NULL,                NULL, NULL },
    { NULL,              0,   0,   0,   0,   0,           0,       0,    0,      0,   0,   NULL,                NULL, NULL }
 };
 
@@ -299,4 +303,26 @@ int button_desc_proc(int msg, DIALOG *d, int c)
 int genuine_proc(int msg, DIALOG *d, int c)
 {
    return D_O_K;
+}
+
+int force_exit_proc(int msg, DIALOG *d, int c)
+{
+   if ( close_req != FALSE )
+   {
+      close_req = FALSE;
+
+      if (alert("Do you really want to exit?", NULL, NULL, "&Yes", "&No", 'y', 'n') == 2)
+      {
+         return D_REDRAWME;
+      }
+      else
+         return D_CLOSE;
+   }
+
+   return D_O_K;
+}
+
+void close_button_handler(void)
+{
+   close_req = TRUE;
 }

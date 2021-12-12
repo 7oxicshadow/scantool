@@ -175,7 +175,13 @@ int open_comport()
       return -1;
    }
 #elif TERMIOS
-    if (comport.number >= 1000) {
+    if (comport.number >= 2000) {
+        if (asprintf(&comport.name, "/dev/rfcomm%d", comport.number - 2000) < 0) {
+            perror("asprintf");
+            exit(1);
+        }
+    }
+    else if (comport.number >= 1000) {
         if (asprintf(&comport.name, "/dev/pts/%d", comport.number - 1000) < 0) {
             perror("asprintf");
             exit(1);
